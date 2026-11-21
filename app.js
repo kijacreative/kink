@@ -72,7 +72,89 @@ const QS = [
   { img: 'q8', text: 'What physical comfort do you appreciate afterward?', opts: [['Being held or having my hair stroked', 'HOLD'], ['Gentle kisses and touch', 'HOLD'], ['A blanket, water, help getting comfortable', 'TEND'], ['A shower or help cleaning up', 'TEND'], ['No touch for a little while', 'SPACE']] },
   { img: 'q9', text: 'If you need space, what helps?', opts: [['My partner checks in first', 'TEND'], ['Clear reassurance that we’re okay', 'TALK'], ['Quiet time without questions', 'SPACE'], ['Time alone, then reconnection', 'SPACE'], ['Talking through what I need in the moment', 'TALK']] }
 ];
-const DATE_QS = ['What makes you feel the most loved by me?', 'What does good aftercare look like for you?', 'Is there anything you’ve wanted to ask for but felt nervous about?'];
+// Conversation prompts for the results page. Language groups are keyed to LANG;
+// `picks` are the two questions surfaced in the date-night section for that language.
+const CONVO = [
+  { key: 'A', title: 'Words of Affirmation', sub: 'How they need to hear love.', picks: [0, 6], qs: [
+    'What is something someone could say to you that would instantly make you feel valued?',
+    'When you’re doubting yourself, what kind of reassurance do you wish someone would give you?',
+    'Do you remember a compliment someone gave you that you’ve never forgotten? Why did it mean so much?',
+    'Do you prefer someone expressing their feelings openly, or showing you through subtle reminders?',
+    'How important is it for your partner to verbally acknowledge the little things you do?',
+    'When you’re upset, do you want to hear that everything will be okay, or be reminded of how strong and capable you are?',
+    'What words do you wish you heard more often in a relationship?',
+    'Do you feel more loved when someone tells you why they love you, or when they simply tell you they love you?'] },
+  { key: 'C', title: 'Quality Time', sub: 'How they experience connection.', picks: [2, 3], qs: [
+    'What does spending meaningful time with someone look like to you?',
+    'Do you feel more connected through deep conversations, doing activities together, or simply existing in the same space?',
+    'If we had an entire day together with no responsibilities, how would you want to spend it?',
+    'What makes you feel like someone is genuinely present with you?',
+    'Does it bother you when someone is physically around but mentally distracted?',
+    'Would you rather have a few hours of someone’s undivided attention, or an entire day together doing separate things?',
+    'What kinds of moments make you feel closest to someone?',
+    'How important is it for your partner to initiate plans rather than always waiting for you to?'] },
+  { key: 'B', title: 'Receiving Gifts', sub: 'The meaning behind thoughtful gestures.', picks: [3, 6], qs: [
+    'Do you value the actual gift more, or the thought and meaning behind it?',
+    'How would you feel if someone remembered a tiny detail you mentioned months ago and surprised you with it?',
+    'Do unexpected little gestures mean more to you than gifts on special occasions?',
+    'What’s something inexpensive that someone could give you that would mean the world?',
+    'Do you feel loved when someone sees something and immediately thinks of you?',
+    'Would you rather receive something sentimental that reminds you of a memory, or something practical that makes your life easier?',
+    'What is the most meaningful gift you’ve ever received, and what made it special?',
+    'Do you enjoy surprises, or do you prefer someone knowing exactly what you want?'] },
+  { key: 'E', title: 'Acts of Service', sub: 'How actions translate into love.', picks: [0, 7], qs: [
+    'What is something someone could do for you that would make you feel genuinely cared for?',
+    'When you’re overwhelmed, do you prefer someone to offer help without being asked, or wait until you ask?',
+    'What everyday responsibility would you appreciate having someone take off your plate?',
+    'Do you feel more loved when someone says they’ll be there for you, or when they actually show up and do something?',
+    'What does being taken care of look like to you?',
+    'If you had a stressful week, what could your partner do to make your life feel a little easier?',
+    'Do little acts of consideration mean more to you than grand romantic gestures?',
+    'What is something you wish people would notice you need without having to explain it?'] },
+  { key: 'D', title: 'Physical Touch', sub: 'Affection, closeness and intimacy.', picks: [0, 5], qs: [
+    'What kind of physical affection makes you feel the most emotionally connected to someone?',
+    'Do you crave affection more when you’re happy, stressed, sad, or simply spending time together?',
+    'Do little touches throughout the day mean more to you than intentional romantic moments?',
+    'How important is physical affection when you’re not being intimate?',
+    'Do you feel comforted by hugs, hand-holding, cuddling, kisses, or simply having someone close?',
+    'What does physical intimacy mean to you beyond the physical?',
+    'When you’re having a difficult day, would a long hug make you feel better?',
+    'Do you associate physical affection with reassurance, security, passion, or all three?'] },
+  { key: 'DEEP', title: 'How you want to be loved', sub: 'Questions that reveal what you might not realize about yourself.', qs: [
+    'When was the last time you felt genuinely loved by someone? What did they do?',
+    'What is something that makes you feel emotionally safe with another person?',
+    'How do you typically recognize that someone genuinely cares about you?',
+    'When you feel disconnected from someone, what do you wish they would do to bring you closer?',
+    'What’s something you give to people that you secretly wish they would give back to you?',
+    'Do you find it easier to express love or receive it?',
+    'What makes you feel like you’re someone’s priority without them having to say it?',
+    'What is one thing a partner could consistently do that would make you feel secure in the relationship?',
+    'When you’re having a hard time, do you want comfort, solutions, reassurance, distraction or space?',
+    'What’s the difference between someone loving you and someone making you feel loved?',
+    'What is a small gesture that actually carries a lot of meaning for you?',
+    'Have you ever felt misunderstood in the way you give or receive love? What happened?'] },
+  { key: 'ROMANCE', title: 'Romantic love + emotional needs', sub: 'What it means to be chosen, again and again.', qs: [
+    'What does being intentionally loved look like to you?',
+    'What makes you feel pursued, even after someone has already won your heart?',
+    'How do you want someone to love you on days when you’re not the easiest person to love?',
+    'What does consistency look like to you in a relationship?',
+    'What makes you feel appreciated rather than simply expected?',
+    'What is something romantic that might seem insignificant to other people but would mean everything to you?',
+    'How do you prefer someone to approach you when you’ve been emotionally distant?',
+    'What makes you feel chosen, even when life gets busy?',
+    'What is one thing you never want to have to beg for in a relationship?',
+    'If someone wanted to love you in a way that felt completely natural to you, what would they need to understand?'] },
+  { key: 'LATE', title: 'Late-night questions', sub: 'The ones that really make you think.', qs: [
+    'If I wanted to make you feel loved without ever saying “I love you,” what would I need to do?',
+    'What is something you wish a partner would notice about you without you having to point it out?',
+    'Do you think the way you show love is the same way you want to receive it?',
+    'What kind of affection do you wish you’d received more of growing up?',
+    'What makes you feel emotionally spoiled?',
+    'If you could design your ideal relationship around how you give and receive love, what would it look like?',
+    'What’s one thing that makes you feel deeply connected to someone that other people might overlook?'] }
+];
+const BIG_Q = 'What is something you find yourself constantly doing for the people you love that you secretly wish someone would do for you?';
+const AFTERCARE_Q = 'What does good aftercare look like for you?';
 const DEMO = [3, 3, 2, 3, 2, 3, 2, 2, 0];
 const EMPTY = () => Array(9).fill(null);
 
@@ -112,7 +194,7 @@ function result() {
   const L1 = LANG[lk[0]], L2 = lk[1] && LANG[lk[1]], A1 = AC[ak[0]], A2 = ak[1] && AC[ak[1]];
   const rit = RITUAL[ak[0]];
   return {
-    langName: lk.map(k => LANG[k].name).join(' + '), langDesc: L1.desc,
+    langKeys: lk, langName: lk.map(k => LANG[k].name).join(' + '), langDesc: L1.desc,
     langSecond: L2 ? 'You speak ' + L2.name + ' just as fluently. ' + L2.short : '',
     love: L2 ? L1.love.slice(0, 2).concat(L2.love[0]) : L1.love, langImg: IMG(LANG_IMG[lk[0]]),
     acName: ak.map(k => AC[k].name).join(' + '), acDesc: A1.desc,
@@ -374,7 +456,27 @@ const screens = {
           <div class="res-body" style="gap:22px;padding:56px 24px 60px">
             <div class="eyebrow">05 · Date night</div>
             <h2 class="display" style="font-size:30px;line-height:1.1">Three questions to ask each other</h2>
-            ${DATE_QS.map((q, i) => `<div class="date-q"><span class="n">${['I', 'II', 'III'][i]}</span><span class="q">${q}</span></div>`).join('')}
+            ${dateQs(R).map((q, i) => `<div class="date-q"><span class="n">${['I', 'II', 'III'][i]}</span><span class="q">${q}</span></div>`).join('')}
+          </div>
+        </section>
+
+        <section class="res-body" style="gap:22px">
+          <div class="eyebrow">06 · Go deeper</div>
+          <h2 class="display" style="font-size:30px;line-height:1.1">The question that says the most</h2>
+          <p class="big-q">“${BIG_Q}”</p>
+          <p class="body" style="line-height:1.6">It shows both how you give love and how you hope to receive it. Don’t run through these like an interview: pick a few, answer them yourself first, and let the conversation unfold. The story behind an answer often says more than the answer.</p>
+          <div class="convo">
+            ${convoGroups(R).map((g, gi) => `
+              <details class="convo-group"${gi === 0 ? ' open' : ''}>
+                <summary>
+                  <span class="stack" style="gap:4px">
+                    <span class="convo-title">${g.title}${R.langKeys.includes(g.key) ? '<span class="convo-tag">Yours</span>' : ''}</span>
+                    <span class="convo-sub">${g.sub} · ${g.qs.length} questions</span>
+                  </span>
+                  <i class="ph ph-plus"></i>
+                </summary>
+                <ol class="convo-list">${g.qs.map(q => `<li>${q}</li>`).join('')}</ol>
+              </details>`).join('')}
           </div>
         </section>
 
@@ -391,6 +493,21 @@ const screens = {
       </div>`;
   }
 };
+
+// Two questions from the person's language (one from each in a blend), then aftercare.
+function dateQs(R) {
+  const group = k => CONVO.find(g => g.key === k);
+  const [k1, k2] = R.langKeys;
+  const qs = k2
+    ? [group(k1).qs[group(k1).picks[0]], group(k2).qs[group(k2).picks[0]]]
+    : group(k1).picks.map(i => group(k1).qs[i]);
+  return qs.concat(AFTERCARE_Q);
+}
+
+// The person's own language groups first, then everything else in its original order.
+function convoGroups(R) {
+  return CONVO.filter(g => R.langKeys.includes(g.key)).concat(CONVO.filter(g => !R.langKeys.includes(g.key)));
+}
 
 function render(allBgs) {
   syncBackground(allBgs);

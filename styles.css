@@ -533,6 +533,83 @@ input::placeholder { color: rgba(239, 228, 214, .4); }
 }
 .date-q .n { font-family: var(--display); font-size: 20px; color: var(--gold); }
 .date-q .q { font-family: var(--serif); font-style: italic; font-size: 21px; line-height: 1.35; color: var(--ivory); text-wrap: pretty; }
+.big-q {
+  margin: 0;
+  padding-left: 18px;
+  border-left: 1px solid var(--gold);
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 23px;
+  line-height: 1.35;
+  color: var(--ivory);
+  text-wrap: pretty;
+}
+.convo { display: flex; flex-direction: column; margin-top: 6px; }
+.convo-group { border-top: 1px solid rgba(184, 148, 106, .28); }
+.convo-group:last-child { border-bottom: 1px solid rgba(184, 148, 106, .28); }
+.convo-group summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0;
+  cursor: pointer;
+  list-style: none;
+}
+.convo-group summary::-webkit-details-marker { display: none; }
+.convo-group summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.convo-group summary i { flex-shrink: 0; font-size: 18px; color: var(--gold); transition: transform .3s var(--ease); }
+.convo-group[open] summary i { transform: rotate(45deg); }
+.convo-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--display);
+  font-size: 21px;
+  line-height: 1.15;
+  color: var(--ivory);
+}
+.convo-tag {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(212, 180, 140, .5);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
+.convo-sub { font-size: 13px; line-height: 1.4; color: #b8a592; }
+.convo-list {
+  margin: 0;
+  padding: 0 0 20px;
+  list-style: none;
+  counter-reset: q;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.convo-list li {
+  counter-increment: q;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  gap: 6px;
+  font-size: 15.5px;
+  line-height: 1.5;
+  color: var(--ivory-soft);
+  text-wrap: pretty;
+}
+.convo-list li::before {
+  content: counter(q, decimal-leading-zero);
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--gold);
+  padding-top: 4px;
+}
 .footer-row {
   display: flex;
   align-items: center;

@@ -36,7 +36,7 @@
     <div class="grid" id="grid"></div>
     <div class="frame" id="1g">
       <div class="label"><span class="id">1g</span><span class="name">Results · Physical Touch + Tend to Me</span></div>
-      <div class="device tall"><iframe src="index.html?preview=results" title="Results" loading="lazy"></iframe></div>
+      <div class="device tall"><iframe id="results-frame" src="index.html?preview=results" title="Results"></iframe></div>
     </div>
   </div>
 </section>
@@ -54,6 +54,16 @@
       <div class="label"><span class="id">${f.id}</span><span class="name">${f.label}</span></div>
       <div class="device"><iframe src="index.html?preview=${f.p}" title="${f.label}" loading="lazy"></iframe></div>
     </div>`).join('');
+
+  // Size the results frame to the full length of the results page.
+  const rf = document.getElementById('results-frame');
+  window.addEventListener('load', async () => {
+    const doc = rf.contentDocument;
+    await doc.fonts.ready;
+    const fit = () => { rf.parentElement.style.height = doc.getElementById('scroller').scrollHeight + 'px'; };
+    fit();
+    new ResizeObserver(fit).observe(doc.querySelector('.results'));
+  });
 </script>
 </body>
 </html>
