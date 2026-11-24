@@ -155,6 +155,33 @@ const CONVO = [
 ];
 const BIG_Q = 'What is something you find yourself constantly doing for the people you love that you secretly wish someone would do for you?';
 const AFTERCARE_Q = 'What does good aftercare look like for you?';
+
+// The booth playing cards (Kink Cards). Each suit draws its questions from CONVO.
+const SUITS = {
+  explore: { name: 'Explore', color: '#19c3ff', keys: ['A', 'B', 'C', 'D', 'E'] },
+  indulge: { name: 'Indulge', color: '#ffe61a', keys: ['ROMANCE'] },
+  restore: { name: 'Restore', color: '#5cf57a', keys: ['DEEP'], extra: [AFTERCARE_Q] },
+  scene: { name: 'Scene', color: '#ff4a6e', keys: ['LATE'], extra: [BIG_Q] }
+};
+const C = k => 'assets/cards/' + k + '.jpg';
+const CARDS = {
+  explore: [
+    { num: 'I', src: C('miravana790'), pos: '45% 22%', zoom: 1.15, bright: .86 },
+    { num: 'II', src: C('DSC_5287'), pos: '42% 50%', zoom: 1, bright: .84 },
+    { num: 'III', src: C('DSC_5261'), pos: '50% 58%', zoom: 1.1, bright: .86 }],
+  indulge: [
+    { num: 'I', src: C('DSC_5599'), pos: '62% 20%', zoom: 1.2, bright: .86 },
+    { num: 'II', src: C('miravana673'), pos: '50% 38%', zoom: 1.1, bright: .86 },
+    { num: 'III', src: C('miravana843'), pos: '50% 55%', zoom: 1.15, bright: .84 }],
+  restore: [
+    { num: 'I', src: C('miravana676'), pos: '50% 40%', zoom: 1.1, bright: .84 },
+    { num: 'II', src: C('miravana764'), pos: '40% 32%', zoom: 1.15, bright: .8 },
+    { num: 'III', src: C('miravana778'), pos: '48% 50%', zoom: 1, bright: .74 }],
+  scene: [
+    { num: 'I', src: C('miravana810'), pos: '50% 45%', zoom: 1.1, bright: .86 },
+    { num: 'II', src: C('miravana821'), pos: '50% 34%', zoom: 1.1, bright: .86 },
+    { num: 'III', src: C('DSC_7466'), pos: '50% 45%', zoom: 1, bright: .9 }]
+};
 const DEMO = [3, 3, 2, 3, 2, 3, 2, 2, 0];
 const EMPTY = () => Array(9).fill(null);
 
@@ -461,7 +488,30 @@ const screens = {
         </section>
 
         <section class="res-body" style="gap:22px">
-          <div class="eyebrow">06 · Go deeper</div>
+          <div class="eyebrow">06 · Draw a card</div>
+          <h2 class="display" style="font-size:30px;line-height:1.1">A question for the two of you</h2>
+          <p class="body" style="line-height:1.6">Take turns. Flip a card, answer it yourself first, then pass the phone.</p>
+          <div class="suits" role="group" aria-label="Suit">
+            ${['all'].concat(Object.keys(SUITS)).map(k => `<button type="button" class="suit-chip" data-act="suit" data-suit="${k}" aria-pressed="${deck.suit === k}"${k === 'all' ? '' : ` style="--suit:${SUITS[k].color}"`}>${k === 'all' ? 'All' : SUITS[k].name}</button>`).join('')}
+          </div>
+          <div class="deck">
+            <div class="deck-under" aria-hidden="true"></div>
+            <div class="deck-under" aria-hidden="true"></div>
+            <button type="button" class="kcard" id="kcard" data-act="flipCard" aria-pressed="false" aria-label="Flip card">
+              <span class="kcard-inner">
+                <span class="kface kback" aria-hidden="true"><span class="kart">${cardBack()}</span></span>
+                <span class="kface kfront" id="kfront"><span class="kart">${cardFront(deck.cards[deck.i])}</span></span>
+              </span>
+            </button>
+          </div>
+          <div class="deck-bar">
+            <span class="deck-count" id="deck-count">${deckCount()}</span>
+            <button type="button" class="btn ghost deck-next" data-act="nextCard">Next card <i class="ph ph-arrow-right"></i></button>
+          </div>
+        </section>
+
+        <section class="res-body" style="gap:22px">
+          <div class="eyebrow">07 · Go deeper</div>
           <h2 class="display" style="font-size:30px;line-height:1.1">The question that says the most</h2>
           <p class="big-q">“${BIG_Q}”</p>
           <p class="body" style="line-height:1.6">It shows both how you give love and how you hope to receive it. Don’t run through these like an interview: pick a few, answer them yourself first, and let the conversation unfold. The story behind an answer often says more than the answer.</p>
@@ -509,7 +559,92 @@ function convoGroups(R) {
   return CONVO.filter(g => R.langKeys.includes(g.key)).concat(CONVO.filter(g => !R.langKeys.includes(g.key)));
 }
 
+// ---------- Card deck ----------
+const deck = { suit: 'all', cards: [], i: 0, flipped: false, busy: false };
+
+function shuffle(a) {
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+// One card per question, dealt in its suit's three designs in turn. With every suit
+// in play, the first card comes from the person's own intimacy language.
+function buildDeck(R) {
+  const own = CONVO.filter(g => R.langKeys.includes(g.key)).flatMap(g => g.qs);
+  const cards = [];
+  Object.entries(SUITS).forEach(([s, S]) => {
+    if (deck.suit !== 'all' && deck.suit !== s) return;
+    const qs = CONVO.filter(g => S.keys.includes(g.key)).flatMap(g => g.qs).concat(S.extra || []);
+    qs.forEach((q, n) => cards.push({ s, q, design: CARDS[s][n % 3] }));
+  });
+  shuffle(cards);
+  const first = cards.findIndex(c => own.includes(c.q));
+  if (first > 0) cards.unshift(cards.splice(first, 1)[0]);
+  Object.assign(deck, { cards, i: 0, flipped: false, busy: false });
+}
+
+const deckCount = () => String(deck.i + 1).padStart(2, '0') + ' / ' + String(deck.cards.length).padStart(2, '0');
+
+function cardIndex(S, num) {
+  return `<span class="kidx"><span class="knum">${num}</span><span class="ksuit" style="color:${S.color}">${S.name}</span></span>`;
+}
+
+function cardFront(c) {
+  const S = SUITS[c.s], d = c.design;
+  return `
+    <img class="kphoto" src="${d.src}" alt="" style="object-position:${d.pos};transform:scale(${d.zoom});transform-origin:${d.pos};filter:saturate(.88) contrast(1.08) brightness(${d.bright}) sepia(.08)">
+    <span class="kshade"></span>
+    <span class="kframe"></span>
+    <span class="kcorner tl">${cardIndex(S, d.num)}</span>
+    <span class="kcorner br">${cardIndex(S, d.num)}</span>
+    <span class="kq">${c.q}</span>
+    <img class="klogo" src="assets/kink-logo-white.svg" alt="">`;
+}
+
+// The printed back, with the QR tile turned into a flip cue for the screen.
+function cardBack() {
+  return `
+    <span class="kback-bg"></span>
+    <span class="kweave"></span>
+    <span class="kframe"></span>
+    <span class="kframe-inner"></span>
+    <span class="kback-body">
+      <img src="assets/kink-logo-white.svg" alt="" style="width:64px">
+      <span class="kback-title">Draw a card</span>
+      <span class="kback-tile">
+        ${Object.values(SUITS).map(S => `<span style="color:${S.color}">${S.name}</span>`).join('')}
+        <i class="ph ph-hand-tap"></i>
+      </span>
+      <span class="kback-cue">Tap to flip</span>
+      <span class="kback-sub">A question for the two of you</span>
+    </span>
+    <span class="kback-links"><span>${esc(CONFIG.website)}</span><span>@kink.bymarivana</span></span>
+    <span class="kback-foot"><span>CBD infused. Kink aftercare approved.</span><b>21+</b></span>`;
+}
+
+function setFlipped(on) {
+  deck.flipped = on;
+  const el = $('kcard');
+  el.setAttribute('aria-pressed', on);
+  el.setAttribute('aria-label', on ? 'Card: ' + deck.cards[deck.i].q + ' Tap to turn face down.' : 'Flip card');
+}
+
+// Turn the card face down, swap in the next question while it's hidden, then deal it face up.
+function nextCard() {
+  if (deck.busy) return;
+  deck.busy = true;
+  const advance = () => {
+    deck.i = (deck.i + 1) % deck.cards.length;
+    $('kfront').innerHTML = `<span class="kart">${cardFront(deck.cards[deck.i])}</span>`;
+    $('deck-count').textContent = deckCount();
+    timers.deal = setTimeout(() => { setFlipped(true); deck.busy = false; }, 120);
+  };
+  if (deck.flipped) { setFlipped(false); timers.deal = setTimeout(advance, 720); }
+  else advance();
+}
+
 function render(allBgs) {
+  if (state.s === 'results') buildDeck(result());
   syncBackground(allBgs);
   scroller.innerHTML = screens[state.s]();
   scroller.classList.toggle('scroll', state.s === 'lead' || state.s === 'results');
@@ -595,6 +730,18 @@ const actions = {
     const R = result(), email = state.email.trim();
     post({ email, first_name: state.name.trim(), request: 'full_questionnaire', intimacy_language: R.langName, aftercare_style: R.acName, ...utm() });
     toast(email ? 'The full questionnaire is on its way to ' + email + '.' : 'The full questionnaire is on its way to your inbox.');
+  },
+  flipCard: () => { if (!deck.busy) setFlipped(!deck.flipped); },
+  nextCard,
+  suit: btn => {
+    deck.suit = btn.dataset.suit;
+    scroller.querySelectorAll('.suit-chip').forEach(b => b.setAttribute('aria-pressed', b === btn));
+    clearTimeout(timers.deal);
+    buildDeck(result());
+    setFlipped(false);
+    $('deck-count').textContent = deckCount();
+    // Swap the face once the card has turned face down.
+    timers.deal = setTimeout(() => { $('kfront').innerHTML = `<span class="kart">${cardFront(deck.cards[0])}</span>`; }, 720);
   },
   retake: () => go({ s: 'intro', qi: 0, answers: EMPTY() })
 };
